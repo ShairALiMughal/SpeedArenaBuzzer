@@ -80,3 +80,18 @@ class NSLBuzzerFunctionality:
     def zone_3(self):
         # Implement Zone 3 specific logic
         pass
+    def get_current_time_str(self):
+        minutes = self.current_time // 60
+        seconds = self.current_time % 60
+        return f"{minutes:02d}:{seconds:02d}"
+
+    def stop_match(self):
+        self.timer_running = False
+        self.timer_paused = False
+        if self.timer_thread:
+            self.timer_thread.join()
+
+    def new_match(self):
+        self.stop_match()
+        self.current_time = 600
+        self.update_display_time()
