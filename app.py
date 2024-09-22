@@ -70,6 +70,7 @@ class NSLBuzzerGUI:
 
         self.extra_20_sec_sound = "secs20.mp3"
         self.combined_sound = "feet_weapon-_2.mp3"
+        self.buzzersound = "buzzersound.mp3"
         self.weapon_time = 9200  # 9.2 seconds
         self.go_time = 13960     # 13.96 seconds
     
@@ -158,6 +159,7 @@ class NSLBuzzerGUI:
             font=("Roboto", 14), fg_color="#4CAF50", hover_color="#45a049"
         )
         self.extra_time_checkbox.place(relx=0.5, rely=0.45, anchor="center")
+    
     def play_sound(self, sound_file):
         pygame.mixer.music.load(sound_file)
         pygame.mixer.music.play()
@@ -215,7 +217,7 @@ class NSLBuzzerGUI:
             return
 
         current_time = self.functionality.get_current_time_str()
-        
+        self.play_sound(self.buzzersound)
         if team == 1 and not self.team1_pressed:
             self.team1_pressed = True
             self.functionality.stop_match()
