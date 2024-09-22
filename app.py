@@ -68,10 +68,11 @@ class NSLBuzzerGUI:
         self.setup_buttons()
         self.setup_extra_time_checkbox()
 
-        self.feet_sound = "feet.mp3"
-        self.weapon_sound = "weapon.mp3"
-        self.start_timer_sound = "POPPP.mp3"
-
+        self.extra_20_sec_sound = "secs20.mp3"
+        self.combined_sound = "feet_weapon-_2.mp3"
+        self.weapon_time = 9200  # 9.2 seconds
+        self.go_time = 13960     # 13.96 seconds
+    
     def setup_frame(self):
         self.frame = ctk.CTkFrame(self.app, width=1000, height=600, fg_color="#1E1E1E")
         self.frame.pack_propagate(0)
@@ -164,9 +165,17 @@ class NSLBuzzerGUI:
     def start_match_sequence(self):
         if self.extra_20_sec.get():
             self.extra_time_countdown = 20
+            self.play_sound(self.extra_20_sec_sound)
             self.update_extra_time_display()
         else:
-            self.show_feet()
+            self.play_combined_sound_sequence()
+    
+    def play_combined_sound_sequence(self):
+        self.play_sound(self.combined_sound)
+        self.show_feet()
+        self.app.after(self.weapon_time, self.show_weapon)
+        self.app.after(self.go_time, self.start_timer)
+    
     def update_extra_time_display(self):
         if self.extra_time_countdown > 0:
             self.timer_label.config(text=f"{self.extra_time_countdown}", font=("Vani", 250, "bold"))
@@ -174,24 +183,19 @@ class NSLBuzzerGUI:
             self.extra_time_countdown -= 1
             self.app.after(1000, self.update_extra_time_display)
         else:
-            self.show_feet()
+            self.play_combined_sound_sequence()
 
     def show_feet(self):
         self.timer_label.config(text="FEET", font=("Vani", 250, "bold"))
         self.time_display.timer_label.config(text="FEET", font=("Vani", 250, "bold"))
-        self.play_sound(self.feet_sound)
-        self.app.after(6000, self.show_weapon)
 
     def show_weapon(self):
         self.timer_label.config(text="WEAPON", font=("Vani", 180, "bold"))
         self.time_display.timer_label.config(text="WEAPON", font=("Vani", 180, "bold"))
-        self.play_sound(self.weapon_sound)
-        self.app.after(6000, self.start_timer)
 
     def start_timer(self):
         self.timer_label.config(font=("Vani", 250, "bold"))
         self.time_display.timer_label.config(font=("Vani", 250, "bold"))
-        self.play_sound(self.start_timer_sound)
         self.functionality.start_match()
 
     def update_timer_display(self, time_str):
