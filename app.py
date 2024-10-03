@@ -3,6 +3,7 @@ from tkinter import Label, Toplevel
 from PIL import Image, ImageTk
 import pygame
 from nslbuzzerfunctionality import NSLBuzzerFunctionality
+import time
 
 class TimeDisplay(Toplevel):
     def __init__(self, master, game_name):
@@ -67,6 +68,9 @@ class NSLBuzzerGUI:
         self.setup_timer_frame()
         self.setup_buttons()
         self.setup_extra_time_checkbox()
+        
+        self.app.bind('<Key-1>', self.key_press)
+        self.app.bind('<Key-2>', self.key_press)
 
         self.extra_20_sec_sound = "secs20.mp3"
         self.combined_sound = "feet_weapon-_2.mp3"
@@ -74,6 +78,8 @@ class NSLBuzzerGUI:
         self.weapon_time = 9200  # 9.2 seconds
         self.go_time = 13960     # 13.96 seconds
     
+
+        
     def setup_frame(self):
         self.frame = ctk.CTkFrame(self.app, width=1000, height=600, fg_color="#1E1E1E")
         self.frame.pack_propagate(0)
@@ -99,13 +105,15 @@ class NSLBuzzerGUI:
         ("Pause", 0.90, 0.55, "#FF9800"),
         
         # Game selection
-        ("Game 1", 0.20, 0.65, "#E91E63"),
+        ("Snatch", 0.10, 0.65, "#009688"),
+        ("Game 1", 0.25, 0.65, "#E91E63"),
         ("Game 2", 0.40, 0.65, "#E91E63"),
-        ("Game 3", 0.60, 0.65, "#E91E63"),
+        ("Game 1v1", 0.60, 0.65, "#E91E63"),
         ("New", 0.80, 0.65, "#00BCD4"),
         
         # Game modes
-        ("Flag 1v1", 0.20, 0.75, "#009688"),
+        ("Flag 1v1", 0.10, 0.75, "#009688"),
+        ("Hang 1v1", 0.25, 0.75, "#00BCD4"),
         ("1v1", 0.40, 0.75, "#009688"),
         ("Zone 1", 0.60, 0.75, "#FF5722"),
         ("Zone 2", 0.75, 0.75, "#FF5722"),
@@ -122,6 +130,8 @@ class NSLBuzzerGUI:
                 command=self.get_button_command(text), font=("Roboto", 14, "bold")
             )
             button.place(relx=x, rely=y, anchor="center")
+        
+            
 
         # Add message label with a background
         message_frame = ctk.CTkFrame(self.frame, fg_color="#2C2C2C", corner_radius=10, width=800, height=40)
@@ -130,9 +140,7 @@ class NSLBuzzerGUI:
         self.message_label = Label(message_frame, text="", font=("Roboto", 14), bg="#2C2C2C", fg="#FFFFFF")
         self.message_label.place(relx=0.5, rely=0.5, anchor="center")
 
-        # Bind keyboard keys
-        self.app.bind('1', lambda event: self.team_button_pressed(1))
-        self.app.bind('2', lambda event: self.team_button_pressed(2))
+        
 
     def get_button_command(self, text):
         commands = {
@@ -144,6 +152,8 @@ class NSLBuzzerGUI:
             "Pause": self.functionality.pause_timer,
             "New": self.new_match,
             "Flag 1v1": self.functionality.flag_hang_1v1,
+            "Hang 1v1": self.functionality.hang_1v1,
+            "Snatch": self.functionality.snatch,
             "1v1": self.functionality.one_v_one,
             "Zone 1": self.functionality.zone_1,
             "Zone 2": self.functionality.zone_2,
@@ -207,13 +217,16 @@ class NSLBuzzerGUI:
     def show(self):
         self.frame.pack()
         self.time_display.deiconify()
+        self.frame.focus_set()
 
     def hide(self):
         self.frame.pack_forget()
         self.time_display.withdraw()
     
     def team_button_pressed(self, team):
+        print(f"Team {team} button pressed function called")  # New debug line
         if not self.functionality.timer_running:
+            print("Timer not running, ignoring button press")  # New debug line
             return
 
         current_time = self.functionality.get_current_time_str()
@@ -232,6 +245,7 @@ class NSLBuzzerGUI:
             if self.team1_pressed:
                 message += f" after Team 1"
             self.message_label.config(text=message)
+        print(f"Message set: {message}")  # New debug line
 
     def new_match(self):
         self.functionality.new_match()
@@ -239,6 +253,16 @@ class NSLBuzzerGUI:
         self.team2_pressed = False
         self.message_label.config(text="")
         self.extra_20_sec.set(False)
+    
+    def key_press(self, event):
+        print(f"Key pressed: {event.char}")  # Debugging line
+        if event.char == '1':
+            print("Simulating Team 1 button press")
+            self.team_button_pressed(1)
+        elif event.char == '2':
+            print("Simulating Team 2 button press")
+            self.team_button_pressed(2)
+            
 
 # Store the game instances
 game_instances = {}
@@ -256,21 +280,21 @@ def main():
     # Create game instances
     game_instances["Game 1"] = NSLBuzzerGUI(root, "Game 1")
     game_instances["Game 2"] = NSLBuzzerGUI(root, "Game 2")
-    game_instances["Game 3"] = NSLBuzzerGUI(root, "Game 3")
+    game_instances["Game 1v1"] = NSLBuzzerGUI(root, "Game 1v1")
    
 
     game_instances["Game 2"].show()
     game_instances["Game 1"].hide()
-    game_instances["Game 3"].hide()
+    game_instances["Game 1v1"].hide()
 
-    game_instances["Game 3"].show()
+    game_instances["Game 1v1"].show()
     game_instances["Game 1"].hide()
     game_instances["Game 2"].hide()
 
     # Initially show Game 1
     game_instances["Game 1"].show()
     game_instances["Game 2"].hide()
-    game_instances["Game 3"].hide()
+    game_instances["Game 1v1"].hide()
 
 
     root.mainloop()

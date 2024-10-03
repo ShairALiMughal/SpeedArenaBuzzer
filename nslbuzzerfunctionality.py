@@ -1,5 +1,14 @@
 import time
 import threading
+import pygame
+
+zon1 = "Zone1.mp3"
+zon2 = "Zone2.mp3"
+zon3 = "Zone3.mp3"
+sound1v1 = "1v1.mp3"
+flaghang = "FlagHang.mp3"
+flaghang1v1 = "FlagHang1v1.mp3"
+snatch = "Snatch.mp3"
 
 class NSLBuzzerFunctionality:
     def __init__(self, update_display_callback):
@@ -61,25 +70,31 @@ class NSLBuzzerFunctionality:
     def pause_timer(self):
         self.timer_paused = not self.timer_paused
 
+    def play_sound(self, sound_file):
+        pygame.mixer.music.load(sound_file)
+        pygame.mixer.music.play()
+
     def flag_hang_1v1(self):
-        # Implement Flag Hang 1v1 specific logic
-        pass
+        self.play_sound(sound_file=flaghang)
+    
+    def snatch(self):
+        self.play_sound(sound_file=snatch)
+
+    def hang_1v1(self):
+        self.play_sound(sound_file=flaghang1v1)
 
     def one_v_one(self):
-        # Implement 1v1 specific logic
-        pass
+        self.play_sound(sound_file=sound1v1)
 
     def zone_1(self):
-        # Implement Zone 1 specific logic
-        pass
-
+        self.play_sound(sound_file=zon1)
+        
     def zone_2(self):
-        # Implement Zone 2 specific logic
-        pass
+        self.play_sound(sound_file=zon2)
 
     def zone_3(self):
-        # Implement Zone 3 specific logic
-        pass
+        self.play_sound(sound_file=zon3)
+        
     def get_current_time_str(self):
         minutes = self.current_time // 60
         seconds = self.current_time % 60
@@ -95,3 +110,4 @@ class NSLBuzzerFunctionality:
         self.stop_match()
         self.current_time = 600
         self.update_display_time()
+    
