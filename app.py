@@ -69,8 +69,6 @@ class NSLBuzzerGUI:
         self.setup_buttons()
         self.setup_extra_time_checkbox()
         
-        self.app.bind('<Key-1>', self.key_press)
-        self.app.bind('<Key-2>', self.key_press)
 
         self.extra_20_sec_sound = "secs20.mp3"
         self.combined_sound = "feet_weapon-_2.mp3"
@@ -79,7 +77,15 @@ class NSLBuzzerGUI:
         self.go_time = 13960     # 13.96 seconds
     
 
-        
+    def key_press(self, event):
+        print(f"Key pressed: {event.char}")  # Debugging line
+        if event.char == '1':
+            print(f"Simulating Team 1 button press for {self.game_name}")
+            self.team_button_pressed(1)
+        elif event.char == '2':
+            print(f"Simulating Team 2 button press for {self.game_name}")
+            self.team_button_pressed(2)
+
     def setup_frame(self):
         self.frame = ctk.CTkFrame(self.app, width=1000, height=600, fg_color="#1E1E1E")
         self.frame.pack_propagate(0)
@@ -254,23 +260,23 @@ class NSLBuzzerGUI:
         self.message_label.config(text="")
         self.extra_20_sec.set(False)
     
-    def key_press(self, event):
-        print(f"Key pressed: {event.char}")  # Debugging line
-        if event.char == '1':
-            print("Simulating Team 1 button press")
-            self.team_button_pressed(1)
-        elif event.char == '2':
-            print("Simulating Team 2 button press")
-            self.team_button_pressed(2)
+
             
 
 # Store the game instances
 game_instances = {}
+current_game = None
 
 def switch_game(game_name):
+    global current_game
     for game_instance in game_instances.values():
         game_instance.hide()
     game_instances[game_name].show()
+    current_game = game_instances[game_name]
+
+def global_key_press(event):
+    if current_game:
+        current_game.key_press(event)
 
 def main():
     root = ctk.CTk()
@@ -281,6 +287,8 @@ def main():
     game_instances["Game 1"] = NSLBuzzerGUI(root, "Game 1")
     game_instances["Game 2"] = NSLBuzzerGUI(root, "Game 2")
     game_instances["Game 1v1"] = NSLBuzzerGUI(root, "Game 1v1")
+    root.bind('<Key-1>', global_key_press)
+    root.bind('<Key-2>', global_key_press)
    
 
     game_instances["Game 2"].show()
@@ -292,6 +300,7 @@ def main():
     game_instances["Game 2"].hide()
 
     # Initially show Game 1
+    switch_game("Game 1")
     game_instances["Game 1"].show()
     game_instances["Game 2"].hide()
     game_instances["Game 1v1"].hide()
