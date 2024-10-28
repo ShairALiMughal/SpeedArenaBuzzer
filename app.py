@@ -68,6 +68,7 @@ class NSLBuzzerGUI:
         self.setup_timer_frame()
         self.setup_buttons()
         self.setup_extra_time_checkbox()
+        self.setup_stream_deck_bindings()  # Add this line here
         
 
         self.extra_20_sec_sound = "secs20.mp3"
@@ -101,7 +102,7 @@ class NSLBuzzerGUI:
     def setup_buttons(self):
         button_configs = [
         # Timer controls
-        ("30s", 0.10, 0.55, "#4CAF50"),
+        ("5m", 0.10, 0.55, "#4CAF50"),
         ("10m", 0.25, 0.55, "#2196F3"),
         ("15m", 0.40, 0.55, "#9C27B0"),
         
@@ -150,7 +151,7 @@ class NSLBuzzerGUI:
 
     def get_button_command(self, text):
         commands = {
-            "30s": self.functionality.set_30_seconds,
+            "5m": self.functionality.set_5_minutes,
             "10m": self.functionality.set_10_minutes,
             "15m": self.functionality.set_15_minutes,
             "Start": self.start_match_sequence,
@@ -160,7 +161,7 @@ class NSLBuzzerGUI:
             "Flag 1v1": self.functionality.flag_hang_1v1,
             "Hang 1v1": self.functionality.hang_1v1,
             "Snatch": self.functionality.snatch,
-            "1v1": self.functionality.one_v_one,
+            "1v1": lambda: self.handle_1v1(),
             "Zone 1": self.functionality.zone_1,
             "Zone 2": self.functionality.zone_2,
             "Zone 3": self.functionality.zone_3,
@@ -169,12 +170,43 @@ class NSLBuzzerGUI:
         }
         return commands.get(text, lambda: switch_game(text))
 
+    def setup_stream_deck_bindings(self):
+        # Timer Controls
+        self.app.bind('<F13>', lambda e: self.get_button_command("5m")())  # 5min timer
+        self.app.bind('<F14>', lambda e: self.get_button_command("10m")())  # 10min timer
+        self.app.bind('<F15>', lambda e: self.get_button_command("15m")())  # 15min timer
+        
+        # Match Controls
+        self.app.bind('<F16>', lambda e: self.get_button_command("Start")())  # Start
+        self.app.bind('<F17>', lambda e: self.get_button_command("Stop")())   # Stop
+        self.app.bind('<F18>', lambda e: self.get_button_command("Pause")())  # Pause
+        
+        # Game Types
+        self.app.bind('<F19>', lambda e: self.get_button_command("Snatch")())     # Snatch
+        self.app.bind('<F20>', lambda e: self.get_button_command("Game 1")())     # Game 1
+        self.app.bind('<F21>', lambda e: self.get_button_command("Game 2")())     # Game 2
+        self.app.bind('<F22>', lambda e: self.get_button_command("Game 1v1")())   # Game 1v1
+        self.app.bind('<F23>', lambda e: self.get_button_command("New")())        # New Game
+        
+        # Game Modes
+        self.app.bind('<F24>', lambda e: self.get_button_command("Flag 1v1")())   # Flag 1v1
+        self.app.bind('<Control-F13>', lambda e: self.get_button_command("Hang 1v1")()) # Hang 1v1
+        self.app.bind('<Control-F14>', lambda e: self.get_button_command("1v1")())      # 1v1
+        self.app.bind('<Control-F15>', lambda e: self.get_button_command("Zone 1")())   # Zone 1
+        self.app.bind('<Control-F16>', lambda e: self.get_button_command("Zone 2")())   # Zone 2
+        self.app.bind('<Control-F17>', lambda e: self.get_button_command("Zone 3")())   # Zone 3
+
+
     def setup_extra_time_checkbox(self):
         self.extra_time_checkbox = ctk.CTkCheckBox(
             self.frame, text="Extra 20 sec", variable=self.extra_20_sec,
             font=("Roboto", 14), fg_color="#4CAF50", hover_color="#45a049"
         )
         self.extra_time_checkbox.place(relx=0.5, rely=0.45, anchor="center")
+    
+    def handle_1v1(self):
+        self.functionality.one_v_one()  # Call the original 1v1 function
+        self.functionality.set_30_seconds()  # Set timer to 30 seconds automatically
     
     def play_sound(self, sound_file):
         pygame.mixer.music.load(sound_file)
@@ -260,6 +292,9 @@ class NSLBuzzerGUI:
         self.message_label.config(text="")
         self.extra_20_sec.set(False)
     
+    
+
+    
 
             
 
@@ -289,6 +324,16 @@ def main():
     game_instances["Game 1v1"] = NSLBuzzerGUI(root, "Game 1v1")
     root.bind('<Key-1>', global_key_press)
     root.bind('<Key-2>', global_key_press)
+
+    # Stream Deck function key bindings (add these)
+    for key in ['<F13>', '<F14>', '<F15>', '<F16>', '<F17>', '<F18>', '<F19>', 
+                '<F20>', '<F21>', '<F22>', '<F23>', '<F24>']:
+        root.bind(key, lambda e: global_key_press(e))
+    
+    # Stream Deck Control+Function key bindings
+    for key in ['<Control-F13>', '<Control-F14>', '<Control-F15>', 
+                '<Control-F16>', '<Control-F17>']:
+        root.bind(key, lambda e: global_key_press(e))
    
 
     game_instances["Game 2"].show()

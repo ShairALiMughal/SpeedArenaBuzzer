@@ -2,6 +2,7 @@ import time
 import threading
 import pygame
 
+# Sound file constants
 zon1 = "Zone1.mp3"
 zon2 = "Zone2.mp3"
 zon3 = "Zone3.mp3"
@@ -17,6 +18,7 @@ class NSLBuzzerFunctionality:
         self.timer_paused = False
         self.current_time = 600  # 10 minutes in seconds
         self.timer_thread = None
+        self.current_game = None
 
     def update_timer(self):
         while self.timer_running:
@@ -39,14 +41,22 @@ class NSLBuzzerFunctionality:
     def set_30_seconds(self):
         self.current_time = 30
         self.update_display_time()
+        self.timer_running = False
+
+    def set_5_minutes(self):
+        self.current_time = 300
+        self.update_display_time()
+        self.timer_running = False
 
     def set_10_minutes(self):
         self.current_time = 600
         self.update_display_time()
+        self.timer_running = False
 
     def set_15_minutes(self):
         self.current_time = 900
         self.update_display_time()
+        self.timer_running = False
 
     def start_match(self):
         if not self.timer_running:
@@ -56,58 +66,54 @@ class NSLBuzzerFunctionality:
             self.timer_thread.daemon = True
             self.timer_thread.start()
 
+    def stop_match(self):
+        self.timer_running = False
+        self.timer_paused = False
+        if self.timer_thread and self.timer_thread.is_alive():
+            self.timer_thread.join(timeout=1.0)
+
+    def pause_timer(self):
+        self.timer_paused = not self.timer_paused
+
     def new_match(self):
         self.stop_match()
         self.current_time = 600
         self.update_display_time()
-
-    def stop_match(self):
-        self.timer_running = False
-        self.timer_paused = False
-        if self.timer_thread:
-            self.timer_thread.join()
-
-    def pause_timer(self):
-        self.timer_paused = not self.timer_paused
 
     def play_sound(self, sound_file):
         pygame.mixer.music.load(sound_file)
         pygame.mixer.music.play()
 
     def flag_hang_1v1(self):
-        self.play_sound(sound_file=flaghang)
+        self.play_sound(sound_file=flaghang1v1)
+        self.current_game = "Flag Hang 1v1"
     
     def snatch(self):
         self.play_sound(sound_file=snatch)
+        self.current_game = "Snatch"
 
     def hang_1v1(self):
-        self.play_sound(sound_file=flaghang1v1)
+        self.play_sound(sound_file=flaghang)
+        self.current_game = "Hang 1v1"
 
     def one_v_one(self):
         self.play_sound(sound_file=sound1v1)
+        self.current_game = "1v1"
+        self.set_30_seconds()  # Automatically set to 30 seconds when 1v1 is selected
 
     def zone_1(self):
         self.play_sound(sound_file=zon1)
+        self.current_game = "Zone 1"
         
     def zone_2(self):
         self.play_sound(sound_file=zon2)
+        self.current_game = "Zone 2"
 
     def zone_3(self):
         self.play_sound(sound_file=zon3)
+        self.current_game = "Zone 3"
         
     def get_current_time_str(self):
         minutes = self.current_time // 60
         seconds = self.current_time % 60
         return f"{minutes:02d}:{seconds:02d}"
-
-    def stop_match(self):
-        self.timer_running = False
-        self.timer_paused = False
-        if self.timer_thread:
-            self.timer_thread.join()
-
-    def new_match(self):
-        self.stop_match()
-        self.current_time = 600
-        self.update_display_time()
-    
