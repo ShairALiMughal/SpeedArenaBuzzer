@@ -166,35 +166,42 @@ class NSLBuzzerGUI:
             "Zone 2": self.functionality.zone_2,
             "Zone 3": self.functionality.zone_3,
             "Team 1": lambda: self.team_button_pressed(1),
-            "Team 2": lambda: self.team_button_pressed(2)
+            "Team 2": lambda: self.team_button_pressed(2),
+            "Game 1v1": lambda: self.switch_to_1v1_game(),  # Add this new command
         }
         return commands.get(text, lambda: switch_game(text))
+    
+    def switch_to_1v1_game(self):
+        switch_game("Game 1v1")
+        self.functionality.set_30_seconds()  # Automatically set to 30 seconds
 
     def setup_stream_deck_bindings(self):
-        # Timer Controls
-        self.app.bind('<F13>', lambda e: self.get_button_command("5m")())  # 5min timer
-        self.app.bind('<F14>', lambda e: self.get_button_command("10m")())  # 10min timer
-        self.app.bind('<F15>', lambda e: self.get_button_command("15m")())  # 15min timer
+        # Timer Controls (F1-F3)
+        self.app.bind('<F1>', lambda e: self.get_button_command("5m")())    # 5min timer
+        self.app.bind('<F2>', lambda e: self.get_button_command("10m")())   # 10min timer
+        self.app.bind('<F3>', lambda e: self.get_button_command("15m")())   # 15min timer
         
-        # Match Controls
-        self.app.bind('<F16>', lambda e: self.get_button_command("Start")())  # Start
-        self.app.bind('<F17>', lambda e: self.get_button_command("Stop")())   # Stop
-        self.app.bind('<F18>', lambda e: self.get_button_command("Pause")())  # Pause
+        # Match Controls (F4-F6)
+        self.app.bind('<F4>', lambda e: self.get_button_command("Start")())  # Start
+        self.app.bind('<F5>', lambda e: self.get_button_command("Stop")())   # Stop
+        self.app.bind('<F6>', lambda e: self.get_button_command("Pause")())  # Pause
         
-        # Game Types
-        self.app.bind('<F19>', lambda e: self.get_button_command("Snatch")())     # Snatch
-        self.app.bind('<F20>', lambda e: self.get_button_command("Game 1")())     # Game 1
-        self.app.bind('<F21>', lambda e: self.get_button_command("Game 2")())     # Game 2
-        self.app.bind('<F22>', lambda e: self.get_button_command("Game 1v1")())   # Game 1v1
-        self.app.bind('<F23>', lambda e: self.get_button_command("New")())        # New Game
+        # Game Types (F7-F11)
+        self.app.bind('<F7>', lambda e: self.get_button_command("Snatch")())     # Snatch
+        self.app.bind('<F8>', lambda e: self.get_button_command("Game 1")())     # Game 1
+        self.app.bind('<F9>', lambda e: self.get_button_command("Game 2")())     # Game 2
+        self.app.bind('<F10>', lambda e: self.get_button_command("Game 1v1")())  # Game 1v1
+        self.app.bind('<F11>', lambda e: self.get_button_command("New")())       # New Game
         
-        # Game Modes
-        self.app.bind('<F24>', lambda e: self.get_button_command("Flag 1v1")())   # Flag 1v1
-        self.app.bind('<Control-F13>', lambda e: self.get_button_command("Hang 1v1")()) # Hang 1v1
-        self.app.bind('<Control-F14>', lambda e: self.get_button_command("1v1")())      # 1v1
-        self.app.bind('<Control-F15>', lambda e: self.get_button_command("Zone 1")())   # Zone 1
-        self.app.bind('<Control-F16>', lambda e: self.get_button_command("Zone 2")())   # Zone 2
-        self.app.bind('<Control-F17>', lambda e: self.get_button_command("Zone 3")())   # Zone 3
+        # Game Modes (F12-F15)
+        self.app.bind('<F12>', lambda e: self.get_button_command("Flag 1v1")())  # Flag 1v1
+        self.app.bind('<F13>', lambda e: self.get_button_command("Hang 1v1")())  # Hang 1v1
+        self.app.bind('<F14>', lambda e: self.get_button_command("1v1")())       # 1v1
+        self.app.bind('<F15>', lambda e: self.get_button_command("Zone 1")())    # Zone 1
+        
+        # Additional controls with Ctrl combinations
+        self.app.bind('<Control-1>', lambda e: self.get_button_command("Zone 2")())   # Zone 2
+        self.app.bind('<Control-2>', lambda e: self.get_button_command("Zone 3")())   # Zone 3
 
 
     def setup_extra_time_checkbox(self):
@@ -206,7 +213,7 @@ class NSLBuzzerGUI:
     
     def handle_1v1(self):
         self.functionality.one_v_one()  # Call the original 1v1 function
-        self.functionality.set_30_seconds()  # Set timer to 30 seconds automatically
+        
     
     def play_sound(self, sound_file):
         pygame.mixer.music.load(sound_file)
@@ -308,6 +315,10 @@ def switch_game(game_name):
         game_instance.hide()
     game_instances[game_name].show()
     current_game = game_instances[game_name]
+    
+    # Automatically set 30 seconds timer for Game 1v1
+    if game_name == "Game 1v1":
+        current_game.functionality.set_30_seconds()
 
 def global_key_press(event):
     if current_game:
@@ -322,18 +333,18 @@ def main():
     game_instances["Game 1"] = NSLBuzzerGUI(root, "Game 1")
     game_instances["Game 2"] = NSLBuzzerGUI(root, "Game 2")
     game_instances["Game 1v1"] = NSLBuzzerGUI(root, "Game 1v1")
+    
+    # Basic number key bindings
     root.bind('<Key-1>', global_key_press)
     root.bind('<Key-2>', global_key_press)
 
-    # Stream Deck function key bindings (add these)
-    for key in ['<F13>', '<F14>', '<F15>', '<F16>', '<F17>', '<F18>', '<F19>', 
-                '<F20>', '<F21>', '<F22>', '<F23>', '<F24>']:
-        root.bind(key, lambda e: global_key_press(e))
+    # Function key bindings (F1-F15)
+    for i in range(1, 16):
+        root.bind(f'<F{i}>', lambda e: global_key_press(e))
     
-    # Stream Deck Control+Function key bindings
-    for key in ['<Control-F13>', '<Control-F14>', '<Control-F15>', 
-                '<Control-F16>', '<Control-F17>']:
-        root.bind(key, lambda e: global_key_press(e))
+    # Control key combinations
+    root.bind('<Control-1>', lambda e: global_key_press(e))
+    root.bind('<Control-2>', lambda e: global_key_press(e))
    
 
     game_instances["Game 2"].show()

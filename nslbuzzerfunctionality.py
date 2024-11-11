@@ -99,7 +99,6 @@ class NSLBuzzerFunctionality:
     def one_v_one(self):
         self.play_sound(sound_file=sound1v1)
         self.current_game = "1v1"
-        self.set_30_seconds()  # Automatically set to 30 seconds when 1v1 is selected
 
     def zone_1(self):
         self.play_sound(sound_file=zon1)
