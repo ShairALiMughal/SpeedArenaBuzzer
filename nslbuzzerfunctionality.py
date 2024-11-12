@@ -10,6 +10,7 @@ sound1v1 = "1v1.mp3"
 flaghang = "FlagHang.mp3"
 flaghang1v1 = "FlagHang1v1.mp3"
 snatch = "Snatch.mp3"
+horn_sound = "hornx3.mp3"  # Added horn sound constant
 
 class NSLBuzzerFunctionality:
     def __init__(self, update_display_callback):
@@ -27,6 +28,7 @@ class NSLBuzzerFunctionality:
                 if self.current_time <= 0:
                     self.current_time = 0
                     self.timer_running = False
+                    self.play_sound(horn_sound)  # Play horn sound when timer ends
                 
                 self.update_display_time()
                 
@@ -66,11 +68,18 @@ class NSLBuzzerFunctionality:
             self.timer_thread.daemon = True
             self.timer_thread.start()
 
-    def stop_match(self):
+    def stop_match(self, skip_horn=False):
+        """
+        Stops the match timer
+        Args:
+            skip_horn (bool): If True, doesn't play the horn sound
+        """
         self.timer_running = False
         self.timer_paused = False
         if self.timer_thread and self.timer_thread.is_alive():
             self.timer_thread.join(timeout=1.0)
+        if not skip_horn:  # Only play horn if not skipped
+            self.play_sound(horn_sound)
 
     def pause_timer(self):
         self.timer_paused = not self.timer_paused
@@ -83,6 +92,15 @@ class NSLBuzzerFunctionality:
     def play_sound(self, sound_file):
         pygame.mixer.music.load(sound_file)
         pygame.mixer.music.play()
+
+    def play_sound_with_delay(self, initial_sound, delay_sound, delay):
+        """
+        Plays an initial sound and then plays a delayed sound after specified seconds
+        """
+        self.play_sound(initial_sound)
+        timer = threading.Timer(delay, lambda: self.play_sound(delay_sound))
+        timer.daemon = True
+        timer.start()
 
     def flag_hang_1v1(self):
         self.play_sound(sound_file=flaghang1v1)

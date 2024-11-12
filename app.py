@@ -74,6 +74,7 @@ class NSLBuzzerGUI:
         self.extra_20_sec_sound = "secs20.mp3"
         self.combined_sound = "feet_weapon-_2.mp3"
         self.buzzersound = "buzzersound.mp3"
+        self.horn_sound = "hornx3.mp3"
         self.weapon_time = 9200  # 9.2 seconds
         self.go_time = 13960     # 13.96 seconds
     
@@ -269,28 +270,33 @@ class NSLBuzzerGUI:
         self.time_display.withdraw()
     
     def team_button_pressed(self, team):
-        print(f"Team {team} button pressed function called")  # New debug line
+        print(f"Team {team} button pressed function called")
         if not self.functionality.timer_running:
-            print("Timer not running, ignoring button press")  # New debug line
+            print("Timer not running, ignoring button press")
             return
 
         current_time = self.functionality.get_current_time_str()
-        self.play_sound(self.buzzersound)
+        self.play_sound(self.buzzersound)  # Play buzzer sound immediately
+        
         if team == 1 and not self.team1_pressed:
             self.team1_pressed = True
-            self.functionality.stop_match()
             message = f"Team 1 pressed the button at {current_time}"
             if self.team2_pressed:
                 message += f" after Team 2"
             self.message_label.config(text=message)
+            # Schedule horn sound and stop after 3 seconds
+            self.app.after(3000, lambda: [self.play_sound(self.horn_sound), self.functionality.stop_match(skip_horn=True)])
+            
         elif team == 2 and not self.team2_pressed:
             self.team2_pressed = True
-            self.functionality.stop_match()
             message = f"Team 2 pressed the button at {current_time}"
             if self.team1_pressed:
                 message += f" after Team 1"
             self.message_label.config(text=message)
-        print(f"Message set: {message}")  # New debug line
+            # Schedule horn sound and stop after 3 seconds
+            self.app.after(3000, lambda: [self.play_sound(self.horn_sound), self.functionality.stop_match(skip_horn=True)])
+            
+        print(f"Message set: {message}")
 
     def new_match(self):
         self.functionality.new_match()
@@ -299,11 +305,7 @@ class NSLBuzzerGUI:
         self.message_label.config(text="")
         self.extra_20_sec.set(False)
     
-    
 
-    
-
-            
 
 # Store the game instances
 game_instances = {}
